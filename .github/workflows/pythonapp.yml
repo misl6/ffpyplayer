@@ -6,7 +6,7 @@ env:
   FFMPEG_VERSION: 4.3.1
   SDL_VERSION: 2.0.12
   SDL_MIXER_VERSION: 2.0.4
-  USE_SDL2_MIXER: 1
+  USE_SDL2_MIXER: 0
   FF_BUILD_DIR: ~/ff_deps
   SDL_ROOT: ~/ff_deps/SDL2
   FFMPEG_ROOT: ~/ff_deps/ffmpeg
@@ -213,45 +213,30 @@ jobs:
           pytest "$name/tests"
 
   osx_wheels:
-    runs-on: macos-10.15
+    runs-on: macos-11
     steps:
-      - uses: actions/checkout@v1
-      - name: Brew setup
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install cibuildwheel
         run: |
-          brew update
-          brew install pkg-config
-          brew install sdl2
-          brew install sdl2_mixer
-          brew install ffmpeg
-          pkg-config --libs --cflags libavcodec
-      - name: Building wheels
+          python -m pip install cibuildwheel==2.3.1
+      - name: Build universal dependencies
         run: |
-          mkdir ~/ffpyplayer_wheels
-
-          for pyver in $OSX_PYVERS; do
-             git reset --hard
-             git clean -d -x -f
-             pyver_short=${pyver:0:3}
-
-             curl -O -L https://www.python.org/ftp/python/$pyver/python-$pyver-macosx10.9.pkg
-             sudo installer -package python-$pyver-macosx10.9.pkg -target /
-             curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-             python$pyver_short get-pip.py --user
-             python$pyver_short -m pip install --upgrade --user pip
-             python$pyver_short -m pip install --upgrade --user cython pytest wheel
-             python$pyver_short -m pip install --upgrade https://github.com/matthew-brett/delocate/archive/master.zip
-
-             python$pyver_short setup.py bdist_wheel
-
-             ls dist/
-             /Library/Frameworks/Python.framework/Versions/$pyver_short/bin/delocate-wheel dist/*.whl
-             /Library/Frameworks/Python.framework/Versions/$pyver_short/bin/delocate-addplat --rm-orig -x 10_9 -x 10_10 dist/*.whl
-             cp dist/*.whl ~/ffpyplayer_wheels
-          done
-
-          git reset --hard
-          git clean -d -x -f
-          cp -r ~/ffpyplayer_wheels dist
+          ./build_macos_universal_deps.sh
+      - name: Build wheels
+        run: |
+          export SDL_ROOT=""
+          export FFMPEG_ROOT=""
+          export SDL_INCLUDE_DIR="./deps_build/SDL/include"
+          export SDL_LIB_DIR="./deps_build/dylib"
+          export FFMPEG_LIB_DIR="./deps_build/dylib"
+          export FFMPEG_INCLUDE_DIR="./deps_build/ffmpeg_x86_64"
+          export DYLD_LIBRARY_PATH=./deps_build/dylib
+          python -m cibuildwheel --archs universal2 --output-dir ffpyplayer_wheels
+          cp -r ffpyplayer_wheels dist
       - name: Upload wheel
         uses: actions/upload-artifact@v2
         with:

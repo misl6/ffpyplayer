@@ -52,7 +52,8 @@ c_options = {
     'config_swscale': True,
     'config_rtsp_demuxer': True,
     'config_mmsh_protocol': True,
-    'config_postproc': platform != 'win32',
+    #'config_postproc': platform != 'win32',
+    'config_postproc': False,
     # whether sdl is included as an option
     'config_sdl': True, # not implemented yet
     'has_sdl2': False,
@@ -271,14 +272,12 @@ else:
             flags = pkgconfig('sdl')
             if flags:
                 sdl = 'SDL'
-    elif sdl_include is not None and not isdir(join(sdl_include, 'SDL2')):
-        sdl = 'SDL'
     print('Selecting %s out of (SDL, SDL2)' % sdl)
 
     sdl_libs = flags.get('library_dirs', []) if sdl_lib is None \
         else [sdl_lib]
     sdl_includes = flags.get('include_dirs', []) if sdl_include is None \
-        else [join(sdl_include, sdl)]
+        else [join(sdl_include)]
 
     library_dirs.extend(sdl_libs)
     include_dirs.extend(sdl_includes)
