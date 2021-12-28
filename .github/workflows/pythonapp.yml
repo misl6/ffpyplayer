@@ -214,6 +214,10 @@ jobs:
 
   osx_wheels:
     runs-on: macos-11
+    env:
+      CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
+        DYLD_LIBRARY_PATH=$REPAIR_LIBRARY_PATH delocate-listdeps {wheel} &&
+        DYLD_LIBRARY_PATH=$REPAIR_LIBRARY_PATH delocate-wheel --require-archs {delocate_archs} -w {dest_dir} {wheel}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.x
@@ -234,7 +238,7 @@ jobs:
           export SDL_LIB_DIR="./deps_build/dylib"
           export FFMPEG_LIB_DIR="./deps_build/dylib"
           export FFMPEG_INCLUDE_DIR="./deps_build/ffmpeg_x86_64"
-          export DYLD_LIBRARY_PATH=./deps_build/dylib
+          export REPAIR_LIBRARY_PATH=./deps_build/dylib
           python -m cibuildwheel --archs universal2 --output-dir ffpyplayer_wheels
           cp -r ffpyplayer_wheels dist
       - name: Upload wheel
