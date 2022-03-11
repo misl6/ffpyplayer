@@ -257,6 +257,7 @@ jobs:
     env:
       USE_SDL2_MIXER: 0
       FFMPEG_BUILD_PATH: "ffmpeg_build"
+      CIBW_BUILD_VERBOSITY: 3
       CIBW_BUILD: "cp37-macosx_x86_64 cp38-macosx_universal2 cp39-macosx_universal2 cp310-macosx_universal2"
       CIBW_ARCHS_MACOS: "x86_64 universal2"
       CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
