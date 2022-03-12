@@ -295,14 +295,7 @@ jobs:
       - name: Fix install names via install_name_prefix_tool for arm64
         run: bash .ci/install_name_prefix_tool.sh "$HOME/${{ env.FFMPEG_BUILD_PATH }}_arm64/lib" "$HOME/${{ env.FFMPEG_BUILD_PATH }}_arm64/lib" @loader_path
 
-      - name: Cache merged ffmpeg
-        id: cache-merged-ffmpeg
-        uses: actions/cache@v2
-        with:
-          path: ~/${{ env.FFMPEG_BUILD_PATH }}
-          key: ${{ runner.os }}-ffmpeg-merged-${{ hashFiles('.ci/merge_osx_deps.sh') }}
       - name: Merge FFmpeg arm64/x86
-        if: steps.cache-arm64-ffmpeg.outputs.cache-hit != 'true' || steps.cache-x86_64-ffmpeg.outputs.cache-hit != 'true' || steps.cache-merged-ffmpeg.outputs.cache-hit != 'true'
         run: bash .ci/merge_osx_deps.sh
 
       - name: Install cibuildwheel
@@ -320,14 +313,6 @@ jobs:
           name: py_wheel
           path: dist
 
-      - name: Upload ffmpeg_build
-        uses: actions/upload-artifact@v3
-        with:
-          name: ffmpeg_build
-          path: |
-            ~/${{ env.FFMPEG_BUILD_PATH }}_x86_64
-            ~/${{ env.FFMPEG_BUILD_PATH }}_arm64
-            ~/${{ env.FFMPEG_BUILD_PATH }}
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@78c309ef59fdb9557cd6574f2e0be552936ed728
         if: startsWith(github.ref, 'refs/tags/')
