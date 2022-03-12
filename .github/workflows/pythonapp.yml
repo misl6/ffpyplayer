@@ -290,6 +290,11 @@ jobs:
         if: steps.cache-x86_64-ffmpeg.outputs.cache-hit != 'true'
         run: bash .ci/build_wheels_osx.sh "x86_64"
 
+      - name: Fix install names via install_name_prefix_tool for x86_64
+        run: bash .ci/install_name_prefix_tool.sh "$HOME/${{ env.FFMPEG_BUILD_PATH }}_x86_64/lib" "$HOME/${{ env.FFMPEG_BUILD_PATH }}_x86_64/lib" @loader_path
+      - name: Fix install names via install_name_prefix_tool for arm64
+        run: bash .ci/install_name_prefix_tool.sh "$HOME/${{ env.FFMPEG_BUILD_PATH }}_arm64/lib" "$HOME/${{ env.FFMPEG_BUILD_PATH }}_arm64/lib" @loader_path
+
       - name: Cache merged ffmpeg
         id: cache-merged-ffmpeg
         uses: actions/cache@v2
