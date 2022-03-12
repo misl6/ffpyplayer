@@ -306,7 +306,8 @@ jobs:
       - name: Build wheels
         run: |
           export REPAIR_LIBRARY_PATH="$HOME/$FFMPEG_BUILD_PATH/lib"
-          export PKG_CONFIG_PATH="$HOME/$FFMPEG_BUILD_PATH/lib/pkgconfig:$PKG_CONFIG_PATH"
+          export FFMPEG_ROOT="$HOME/$FFMPEG_BUILD_PATH"
+          export SDL_ROOT="$HOME/$FFMPEG_BUILD_PATH"
           python -m cibuildwheel --output-dir dist
       - name: Upload wheel
         uses: actions/upload-artifact@v2
